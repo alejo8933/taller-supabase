@@ -9,12 +9,14 @@ export const dashboardService = {
       .select('completada, created_at')
     if (error) throw error
 
-    const total        = data!.length
-    const completadas  = data!.filter(t => t.completada).length
-    const pendientes   = total - completadas
-    const porcentaje   = total > 0 ? Math.round((completadas / total) * 100) : 0
-    const hoy          = new Date().toISOString().split('T')[0]
-    const creadasHoy   = data!.filter(t => t.created_at.startsWith(hoy)).length
+    const total       = data!.length
+    const completadas = data!.filter(t => t.completada).length
+    const pendientes  = total - completadas
+    const porcentaje  = total > 0 ? Math.round((completadas / total) * 100) : 0
+    const hoy         = new Date().toISOString().split('T')[0]
+
+    // ✅ Fix: verificar que created_at no sea null antes de usar .startsWith()
+    const creadasHoy  = data!.filter(t => t.created_at?.startsWith(hoy) ?? false).length
 
     return { total, completadas, pendientes, porcentaje, creadasHoy }
   },
@@ -31,10 +33,11 @@ export const dashboardService = {
       .order('created_at', { ascending: true })
     if (error) throw error
 
-    // Agrupar por fecha
     const grouped: Record<string,{creadas:number;completadas:number}> = {}
     data!.forEach(t => {
-      const d = t.created_at.split('T')[0]
+      // ✅ Fix: verificar que created_at no sea null antes de usar .split()
+      const d = t.created_at?.split('T')[0] ?? ''
+      if (!d) return
       if (!grouped[d]) grouped[d] = { creadas:0, completadas:0 }
       grouped[d].creadas++
       if (t.completada) grouped[d].completadas++
@@ -50,8 +53,8 @@ export const dashboardService = {
   getDistribution: async () => {
     const { data, error } = await supabase.from('tareas').select('completada')
     if (error) throw error
-    const completadas  = data!.filter(t => t.completada).length
-    const pendientes   = data!.length - completadas
+    const completadas = data!.filter(t => t.completada).length
+    const pendientes  = data!.length - completadas
     return [
       { name:'Completadas', value:completadas, color:'#10b981' },
       { name:'Pendientes',  value:pendientes,  color:'#f59e0b' },

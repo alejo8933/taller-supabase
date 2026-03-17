@@ -18,23 +18,23 @@ export function TaskItem({ tarea, onActualizar, onEliminar }: Props) {
 
     return (
         <div style={{ display:'flex', gap:'1rem', alignItems:'center', padding:'1rem', border:'1px solid #e2e8f0', borderRadius:'8px', marginBottom:'0.5rem', opacity: eliminado ? 0.5 : 1 }}>
-        <input type='checkbox' checked={tarea.completada}
-            onChange={ () => onActualizar(tarea.id, !tarea.completada)} />
+        <input type='checkbox' checked={tarea.completada ?? false}
+            onChange={ () => onActualizar(tarea.id, !(tarea.completada ?? false))} />
             <div style={{ flex:1 }}>
                 <strong style={{
-                    textDecoration: tarea.completada ? 'line.through' : 'none',
+                    textDecoration: tarea.completada ? 'line-through' : 'none',
                     color: tarea.completada ? '#94a3b8' : '#1a1a1a' }}>
                     {tarea.titulo}
                 </strong>
                 {tarea.descripcion && (
                     <p style={{ margin:0, color:'#64748b', fontSize:'0.9rem' }}>
-
+                        {tarea.descripcion}
                     </p>
                 )}
             </div>
             <button onClick={handleEliminar} disabled={eliminado}
                 style={{ color:'red', cursor:'pointer', background:'none', border:'none' 
-    }}>
+            }}>
             🗑 Eliminar
             </button>
         </div>
